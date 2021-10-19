@@ -1,0 +1,9 @@
+{
+	"target_languages": ["es", "fr", "de", "it", "ja", "zs", "ru", "en", "ko", "pt", "ar", "dn", "sv", "nb", "tr", "pl", "ga", "el", "he", "da", "hi", "cs", "eo", "nl-NL", "uk", "cy", "vi", "hu", "sw", "ro", "id", "hw", "nv", "kl", "hv", "la", "gd", "fi", "yi"],
+	"native_languages": ["es", "fr", "de", "it", "ja", "zs", "ru", "en", "ko", "pt", "ar", "dn", "sv", "nb", "tr", "pl", "ga", "el", "he", "da", "hi", "cs", "eo", "nl-NL", "uk", "cy", "vi", "hu", "sw", "ro", "id", "hw", "nv", "kl", "hv", "la", "gd", "fi", "yi"],
+	"target_lang": "*:fr",
+	"native_lang": "*:en",
+	"ignored_words": "*:le,la,les,l'",
+	"main_field": "*:Word",
+	"example_paste_format": "{tl}"
+}
