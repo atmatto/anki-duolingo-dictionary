@@ -5,5 +5,6 @@
 	"native_lang": "*:en",
 	"ignored_words": "*:le,la,les",
 	"main_field": "*:Word",
-	"example_paste_format": "{tl}"
+	"example_paste_format": "{tl}",
+	"hide_example_translations": false
 }

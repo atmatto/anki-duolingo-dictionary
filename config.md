@@ -12,6 +12,8 @@
 
 `example_paste_format` - format used to paste examples, `{tl}` is replaced by target language version of the example, and `{nl}` is replaced by native language translation of the example.
 
+`hide_example_translations` - if true, example translations won't be visible by default
+
 ## Deck rule notation
 ```
 deck:value;deck2:value2;*:catch all value

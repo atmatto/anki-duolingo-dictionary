@@ -48,6 +48,11 @@ class Word:
 				# TODO Find a better way?
 			return func
 
+		def show_translation_f(label, text):
+			def func():
+				label.setText(text)
+			return func
+
 		def clicked():
 			if loading.text() != "Loaded":
 				loading.setText("Loading examples...")
@@ -61,7 +66,10 @@ class Word:
 						example_layout = qt.QHBoxLayout()
 						example_layout.setContentsMargins(0,0,0,0)
 						example_label = qt.QLabel()
-						example_label.setText("<div style=\"font-size: 16pt\">" + conv_html(example["example_sentence"]) + "</div><div>" + conv_html(example["translation"]) + "</div>")
+						if config["hide_example_translations"]:
+							example_label.setText("<div style=\"font-size: 16pt\">" + conv_html(example["example_sentence"]) + "</div>")
+						else:
+							example_label.setText("<div style=\"font-size: 16pt\">" + conv_html(example["example_sentence"]) + "</div>" + "<div>" + conv_html(example["translation"]) + "</div>")
 						example_button = qt.QPushButton()
 						qt.qconnect(example_button.clicked, paste_example(config["example_paste_format"].format(tl=example["text"], nl=example["translation_text"])))
 						example_button.setText("")
@@ -71,6 +79,11 @@ class Word:
 						example_widget.setLayout(example_layout)
 						example_layout.addWidget(example_button, 0)
 						example_layout.addWidget(example_label, 1)
+						if config["hide_example_translations"]:
+							show_translation = qt.QPushButton()
+							show_translation.setText("Show translation")
+							qt.qconnect(show_translation.clicked, show_translation_f(example_label, "<div style=\"font-size: 16pt\">" + conv_html(example["example_sentence"]) + "</div>" + "<div>" + conv_html(example["translation"]) + "</div>"))
+							example_layout.addWidget(show_translation, 0)
 						examples_layout.addWidget(example_widget)
 		
 		# Tab
