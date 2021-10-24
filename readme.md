@@ -1,5 +1,5 @@
 # Duolingo Dictionary Anki add-on
-[AnkiWeb](https://github.com/atmatto/anki-duolingo-dictionary)
+[AnkiWeb](https://ankiweb.net/shared/info/1700150644)
 <hr>
 
 This addon provides an UI to search for words in the Duolingo dictionary.
