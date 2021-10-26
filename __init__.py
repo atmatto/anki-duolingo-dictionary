@@ -1,6 +1,7 @@
 from aqt import gui_hooks, mw, qt
 from aqt.editor import Editor
-from anki.notes import Note, NoteType
+from anki.notes import Note
+from anki.models import NoteType
 from typing import List
 from pathlib import Path
 import requests
