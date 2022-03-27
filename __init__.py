@@ -159,7 +159,7 @@ class Widget:
 		global conifg
 
 		self.note: Note
-		self.ed: Editor
+		self.ed = ed
 		self.is_custom_search = False
 
 		self.id = str(uuid4())
@@ -262,10 +262,8 @@ class Widget:
 		nam.finished.connect(self.on_response)
 
 		self.focus_hook_lambda = lambda n, i: self.update_on_focus(n, i)
-		self.load_hook_lambda = lambda ed: self.update_on_load(ed)
 		self.notetype_hook_lambda = lambda nt: self.update_on_note_type_change(nt)
 		gui_hooks.editor_did_focus_field.append(self.focus_hook_lambda)
-		gui_hooks.editor_did_load_note.append(self.load_hook_lambda)
 		gui_hooks.current_note_type_did_change.append(self.notetype_hook_lambda)
 	
 	def toggle_ui(self):
@@ -276,7 +274,6 @@ class Widget:
 
 	def cleanup(self):
 		gui_hooks.editor_did_focus_field.remove(self.focus_hook_lambda)
-		gui_hooks.editor_did_load_note.remove(self.load_hook_lambda)
 		gui_hooks.current_note_type_did_change.remove(self.notetype_hook_lambda)
 		nam.finished.disconnect(self.on_response)
 
@@ -311,7 +308,7 @@ class Widget:
 			self.field_selector.insertItem(1000, f)
 		self.field_selector.setCurrentIndex(i) # 0 if i == -1 else i
 
-		deck = mw.col.decks.name(self.note.model()["did"]) # temp, returns default deck for current note type TODO
+		deck = mw.col.decks.name(self.note.note_type()["did"]) # temp, returns default deck for current note type TODO
 
 		if self.nl_selector.currentText() == "":
 			self.nl_selector.setCurrentText(parse_deck_rule(config["native_lang"], deck))
@@ -344,10 +341,6 @@ class Widget:
 
 	def update_on_focus(self, n: Note, i: int = 0):
 		self.note = n
-		self.update()
-
-	def update_on_load(self, ed: Editor):
-		self.ed = ed
 		self.update()
 
 	def update_on_note_type_change(self, nt: NoteType):
