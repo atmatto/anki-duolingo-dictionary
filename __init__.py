@@ -6,6 +6,7 @@ from typing import List
 from pathlib import Path
 from uuid import uuid4
 import json
+import os
 
 nam = qt.QNetworkAccessManager()
 
@@ -127,7 +128,6 @@ class Word:
 		self.waiting_for[id] = on_load
 		dictionary(lexemeId, id)
 
-
 	def __init__(self, search_results, native_language, addon_widget):
 		self.addon_widget = addon_widget
 		self.widget = qt.QTabWidget()
@@ -151,19 +151,8 @@ class Word:
 			self.shown_funcs[0]()
 
 class Widget:
-	def do_custom_search(self):
-		self.is_custom_search = True
-		self.update(True)
-
-	def __init__(self, ed: Editor):
-		global conifg
-
-		self.note: Note
-		self.ed = ed
-		self.is_custom_search = False
-
-		self.id = str(uuid4())
-		self.waiting_for = set()
+	def setup_ui(self, ed):
+		global config
 
 		splitter = qt.QSplitter(qt.Qt.Vertical)
 
@@ -223,7 +212,7 @@ class Widget:
 		search = qt.QPushButton()
 		search.setText("Search")
 		search.setAutoDefault(True)
-		qt.qconnect(search.clicked, lambda: self.do_custom_search())
+		qt.qconnect(search.clicked, lambda: self.update(True, True))
 
 		header3 = qt.QWidget()
 		header3_layout = qt.QHBoxLayout(header3)
@@ -261,21 +250,34 @@ class Widget:
 
 		nam.finished.connect(self.on_response)
 
-		self.focus_hook_lambda = lambda n, i: self.update_on_focus(n, i)
-		self.notetype_hook_lambda = lambda nt: self.update_on_note_type_change(nt)
+		self.focus_hook_lambda = lambda n, i: self.update(note=n)
+		self.notetype_hook_lambda = lambda nt: self.update()
 		gui_hooks.editor_did_focus_field.append(self.focus_hook_lambda)
 		gui_hooks.current_note_type_did_change.append(self.notetype_hook_lambda)
-	
-	def toggle_ui(self):
-		if self.group_box.isVisible():
-			self.group_box.setVisible(False)
-		else:
-			self.group_box.setVisible(True)
 
+	def __init__(self, ed: Editor):
+		print(self)
+		self.note: Note
+		self.ed = ed
+		self.is_custom_search = False
+
+		self.id = str(uuid4())
+		self.waiting_for = set()
+
+		self.setup_ui(ed)
+	
 	def cleanup(self):
 		gui_hooks.editor_did_focus_field.remove(self.focus_hook_lambda)
 		gui_hooks.current_note_type_did_change.remove(self.notetype_hook_lambda)
 		nam.finished.disconnect(self.on_response)
+
+	def toggle_ui(self):
+		self.group_box.setVisible(not self.group_box.isVisible())
+
+	def search_request(self, languageId, query, uiLanguageId):
+		id = "s."+self.id+":"+languageId+"."+uiLanguageId+"."+query
+		self.waiting_for.add(id)
+		search(languageId, query, uiLanguageId, id)
 
 	def on_response(self, r):
 		req_id = r.request().attribute(qt.QNetworkRequest.User)
@@ -289,15 +291,11 @@ class Widget:
 				print("Failed parsing response.")
 			self.content.addTab(Word(results, self.nl_selector.currentText(), self).widget, w)
 
-		
-	def search_request(self, languageId, query, uiLanguageId):
-		id = "s."+self.id+":"+languageId+"."+uiLanguageId+"."+query
-		self.waiting_for.add(id)
-		search(languageId, query, uiLanguageId, id)
-
-	def update(self, request=False):
+	def update(self, request=False, custom=False, note=None):
 		global config
-		config = mw.addonManager.getConfig(__name__)
+
+		if not note == None:
+			self.note = note
 
 		if not hasattr(self, "note"):
 			return
@@ -327,9 +325,8 @@ class Widget:
 
 		if request:
 			t = ""
-			if self.is_custom_search:
+			if custom:
 				t = self.custom_search.text()
-				self.is_custom_search = False
 			else:
 				for f, c in self.note.items():
 					if f == self.field_selector.currentText():
@@ -338,16 +335,6 @@ class Widget:
 			self.content.clear()
 			for w in get_words(ignore(t, self.ignored.text())):
 				self.search_request(self.tl_selector.currentText(), w, self.nl_selector.currentText())
-
-	def update_on_focus(self, n: Note, i: int = 0):
-		self.note = n
-		self.update()
-
-	def update_on_note_type_change(self, nt: NoteType):
-		self.update()
-
-	def button_clicked(self):
-		self.toggle_ui()
 
 
 def parse_deck_rule(s: str, deck: str = "*") -> str:
@@ -407,7 +394,7 @@ def get_words(s: str) -> List[str]:
 
 def setup_button(buttons: List[str], ed: Editor) -> None:
 	widget = Widget(ed)
-	btn = ed.addButton(icon(), str(id(widget)), lambda ed, widget=widget: widget.button_clicked(), "Duolingo dictionary", toggleable=True, disables=False)
+	btn = ed.addButton(icon(), str(id(widget)), lambda ed, widget=widget: widget.toggle_ui(), "Duolingo dictionary", toggleable=True, disables=False)
 	buttons.insert(-1, btn)
 
 def setup() -> None:
