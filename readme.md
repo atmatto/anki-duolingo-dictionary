@@ -2,6 +2,10 @@
 [AnkiWeb](https://ankiweb.net/shared/info/1700150644)
 <hr>
 
+## This addon won't work as expected
+Duolingo discontinued the dictionary and currently the addon **won't be able to fetch example sentences**. This issue might be resolved in future.
+<hr>
+
 This addon provides an UI to search for words in the Duolingo dictionary.
 
 ![Screenshot depicting the addon's user interface](screenshot.png)
